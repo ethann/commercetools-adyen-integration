@@ -17,7 +17,7 @@ describe('credit card payment', () => {
 
   beforeEach(async () => {
     ctpClient = ctpClientBuilder.get()
-    await iTSetUp.initServerAndExtension(ctpClient)
+    await iTSetUp.initServerAndExtension({ ctpClient })
   })
 
   afterEach(async () => {

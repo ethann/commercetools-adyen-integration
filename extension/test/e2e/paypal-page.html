@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Paypal</title>
+    </head>
+    <body>
+        <p>
+            In order to redirect to paypal, I had to create this page and then paste the generated link into the next link element.
+            I could not use <cite>cy.visit()</cite> directly to go to paypal, as this would change the URL of the test and retrigger it.
+            The reason is <cite>cy.visit()</cite> is bound to <cite>baseUrl</cite> set in config and when you go to a different URL,
+            the baseUrl has to change to (probably because of same-origin policy).
+            Right now there's an issue to allow different <cite>baseUrl</cite> per test: https://github.com/cypress-io/cypress/issues/2636.
+        </p>
+        <a href="https://www.sandbox.paypal.com" data-e2e="paypalLink">Go to paypal</a>
+    </body>
+</html>
