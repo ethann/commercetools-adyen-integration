@@ -1,19 +1,50 @@
 const fetch = require('node-fetch')
+const { Client, Config, CheckoutAPI } = require('@adyen/api-library')
 const { serializeError } = require('serialize-error')
 const configLoader = require('../config/config')
 
-const config = configLoader.load()
+const env = configLoader.load()
+const config = new Config()
+
+config.apiKey = env.adyen.apiKey
+config.merchantAccount = env.adyen.merchantAccount
+
+const client = new Client({ config })
+client.setEnvironment("TEST") // TODO: take it as environment var
+
+const checkout = new CheckoutAPI(client);
 
 function getOriginKeys (getOriginKeysRequestObj) {
   return callAdyen(`${config.adyen.apiBaseUrl}/originKeys`, getOriginKeysRequestObj)
 }
 
-function getPaymentMethods (getPaymentMethodsRequestObj) {
-  return callAdyen(`${config.adyen.apiBaseUrl}/paymentMethods`, getPaymentMethodsRequestObj)
+async function getPaymentMethods (request) {
+  request.merchantAccount = env.adyen.merchantAccount
+  const response = await checkout.paymentMethods(getPaymentMethodsRequestObj)
+    .then(res => res)
+    .then(res => {
+      // strip away sensitive data from the adyen response.
+      delete res.additionalData
+      return res
+    })
+    .catch(err => serializeError(err))
+
+  return { request, response }
 }
 
-function makePayment (makePaymentRequestObj) {
-  return callAdyen(`${config.adyen.apiBaseUrl}/payments`, makePaymentRequestObj)
+async function makePayment (request) {
+  request.merchantAccount = env.adyen.merchantAccount
+  return await checkout.payments(makePaymentRequestObj)
+    .then(res => res)
+    .then(res => {
+      // strip away sensitive data from the adyen response.
+      delete res.additionalData
+      return res
+    })
+    .catch(err => serializeError(err))
+
+
+  return { request, response }
 }
 
 function submitAdditionalPaymentDetails (submitAdditionalPaymentDetailsRequestObj) {
